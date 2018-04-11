@@ -1,0 +1,32 @@
+<form action="/create" method="POST" class="rest">
+  <h1>Create an entry</h1>
+  <input type="hidden" name="timestamp">
+  <input type="hidden" name="id" value="{{id}}">
+  <input type="text" placeholder="Title" name="title">
+  <span>
+    <input type="time" name="time"
+    ><input type="date" name="date"
+    ><button id="show-img-ui">Add photos</button
+  ></span>
+  <textarea placeholder="Your thoughts" name="body"></textarea>
+  <div id="img-ui">
+    <ul id="img-files"><li id="add">
+      <button class="icon">&#59914;</button>
+      <input type="file" accept="image/*" name="files" multiple>
+    </li></ul>
+    <div id="img-md">Insert into markdown using: <code>![Your text](/images/{{id}}/<span></span>)</code></div>
+    <ul id="images"></ul>
+  </div>
+  <button type="submit">Create <span class="spinner icon">&#59772;</spin></button>
+</form>
+<template id="image-title"
+  ><li>
+    <button class="remove icon">&#59915;</button>
+    <span class="file-name" tabindex="-1"></span>
+    <input type="text">
+  </li
+></template>
+<template id="image"><li><img></li></template>
+{{#contentFor 'scripts'}}
+<script src="/js/create.js"></script>
+{{/contentFor}}

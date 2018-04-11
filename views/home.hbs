@@ -1,0 +1,57 @@
+<nav id="header-nav">
+  <div id="next" class="icon">&#59966;</div>
+  <div id="menu" tabindex="-1">
+    <div id="menu-icon" class="icon">&#59837;</div>
+    <ol id="menu-list">
+      <li id="create"><a href="/create" tabindex="-1">Create entry</a></li>
+      <li id="options"><a href="/options" tabindex="-1">Options</a></li>
+      <li id="help"><a href="/help" tabindex="-1">Help</a></li>
+      <li id="logout"><a href="/logout" tabindex="-1">Log out</a></li>
+    </ol>
+  </div>
+</nav>
+<main
+  ><h1 class="show">Diary</h1
+  {{#if initial}}
+  ><ol id="entries"
+    ><li class="message">{{{welcome}}}</li
+  {{else if noEntries}}
+  ></ol
+  ><ol id="entries"
+    ><li class="no-entries">Nothing at all...</li
+  ></ol
+  {{else if entryList}}
+  ><ol id="entries"
+  {{#each entryList}}
+    ><li class="entry" id="{{this.id}}" data-epoch="{{this.timestamp}}"
+      ><div class="entry-header"
+        ><span class="entry-title" tabindex="-1"
+          ><h1 class="entry-titletext">{{this.title}}</h1
+          >&#8203;<a href="/update/{{this.id}}" class="edit" tabindex="-1">edit</a
+          >&#8203;<form action="/delete" method="POST" class="delete"
+            ><span tabindex="-1">delete</span
+            ><input type="submit" class="confirm-delete" value="are you sure?"
+            ><input type="hidden" name="id" value="{{this.id}}"
+          ></form
+        ></span
+        ><span class="entry-time"></span
+      ></div
+      ><div class="entry-body">{{{this.body}}}</div
+    ></li
+  {{/each}}
+  ></ol
+  ><nav id="footer-nav"
+    ><span id="pagination">{{#paginate}}<a {{#if this.cur}}class="currentPage"{{/if}} href="/?perPage={{this.pp}}&numPage={{this.num}}">{{this.start}}-{{this.end}}</a>{{/paginate}}</span
+    ><span id="page-length"><select>{{#pagelength '5, 10, 25, 50, 100'}}<option{{#if this.active}} selected{{/if}}>{{this.val}}</option>{{/pagelength}}</select></span
+  ></nav
+  {{/if}}
+></main>
+<template id="date">
+  <li class="date"
+    ><div class="date-heading"></div
+  ></li>
+</template>
+{{#contentFor 'scripts'}}
+<script>var timeZone = '{{timezone}}'</script>
+<script src="js/diary.js"></script>
+{{/contentFor}}

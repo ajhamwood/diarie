@@ -1,0 +1,47 @@
+<h1>Options</h1>
+<form action="/options" method="POST" id="timezone">
+  <h2>Change timezone</h2>
+  <input type="text" id="timezone-search" placeholder="Search timezones"
+  ><select name="timezone" required></select
+  ><button type="submit">Update</button>
+  <input type="hidden" name="option" value="timezone">
+</form>
+<form action="/issue-qr" method="POST" id="gen-qr">
+  <h2>Issue QR Code</h2>
+  <button id="generate">Generate</button>
+  <div id="warning">
+    <div>Warning: replaces current QR code (so it will no longer work)</div>
+    <button id="gen-cancel">Cancel</button>
+    <button id="gen-ok">OK <span class="spinner icon">&#59772;</span></button>
+  </div>
+  <div id="qr-info">
+    <div>Current QR (hold to download)</div>
+    <canvas></canvas>
+    <svg><circle></circle></svg>
+    <div>Text representation</div>
+    <code></code>
+  </div>
+  <input type="hidden" name="option" value="auth">
+  <input type="hidden" name="uuid">
+</form>
+<form action="/purge" method="POST" id="purge">
+  <h2>Delete diary entirely</h2>
+  <div id="confirm-purge-label">
+    <span>Once you delete it it's gone, so make sure this is what you really want to do.</span>
+  </div
+  ><div id="confirm-purge">
+    <div>To confirm, please type "Man Shan Kan"</div>
+    <input type="text">
+  </div
+  ><input type="hidden" name="auth"
+  ><button>Purge</button>
+</form>
+<template id="option">
+  <option></option>
+</template>
+{{#contentFor 'scripts'}}
+<script>var timeZone = '{{timezone}}', initial = {{initial}}</script>
+<script src="https://cdn.rawgit.com/jeromeetienne/jquery-qrcode/master/src/qrcode.js"></script>
+<script src="/js/options.js"></script>
+{{/contentFor}}
+{{#contentFor 'class'}}rest{{/contentFor}}

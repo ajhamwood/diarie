@@ -1,0 +1,12 @@
+{{#if message}}<p>{{message}}</p>{{/if}}
+<div id="video-wrapper">
+  <video></video>
+  <div id="click-me">Click me</div>
+  <div id="swap" class="icon hide">&#59648;</div>
+  <div id="login-fail" class="icon hide">&#59919;</div>
+</div>
+{{#contentFor 'scripts'}}
+<script src="https://cdn.rawgit.com/mebjas/html5-qrcode/master/minified/jsqrcode-combined.min.js"></script>
+<script src="/js/scan.js"></script>
+{{/contentFor}}
+{{#contentFor 'class'}}scan{{/contentFor}}

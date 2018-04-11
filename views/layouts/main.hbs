@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head>
+  <title>Diary</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A private diary.">
+  <link rel="stylesheet" href="/css/diary.css">
+  <link rel="stylesheet" href="/css/fonts.css">
+  <link rel="stylesheet" href="https://cdn.rawgit.com/oxalorg/sakura/master/css/sakura.css">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+</head>
+<body class="{{{block 'class'}}}">
+  {{{body}}}
+  <script>
+// Utilities
+function $ (sel, node) { return Array.prototype.slice.call( (node || document).querySelectorAll(sel) ) }
+$.addEvents = function (obj, node) {
+  for (var q in obj) for (var e in obj[q])
+    for (var ns = q ? $(q, node) : [window, document], es = e.split(' '), i = 0; i < es.length; i++)
+      typeof ns === 'undefined' || ns.forEach(n => n.addEventListener(es[i], obj[q][e].bind(n))) };
+$.load = function (id, node) {
+  (typeof node === 'undefined' ? [document.body] : $(node))
+    .forEach(n => n.appendChild(document.importNode($('#' + id)[0].content, true))) };
+  </script>
+  {{{block 'scripts'}}}
+</body>
+</html>
