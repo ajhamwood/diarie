@@ -22,7 +22,7 @@ const converter = new showdown.Converter({emoji: true, underline: true, tables: 
 
 router.get('/', async (req, res) => {
   let { initial } = await req.app.db.collection('welcome').findOne({initial: {$exists: 1}});
-  if (req.session.auth) {
+  if (req.session.login) {
     let pp = parseInt(req.query.perPage),
         np = parseInt(req.query.numPage);
     if (!pp || pp < 0) pp = 10;
@@ -45,7 +45,7 @@ router.get('/', async (req, res) => {
 router.post('/', upload.array(), async (req, res) => {
   let auth = await req.app.db.collection('options').findOne({option: 'auth'});
   if (auth && 'auth' in req.body && await bcrypt.compare(req.body.auth, auth.hash)) {
-    req.session.auth = 'ok';
+    req.session.login = 'ok';
     req.session.hash = auth.hash;
     res.send({ok: 1});
     await req.app.db.collection('welcome').findOneAndUpdate({initial: {$exists: 1}}, {initial: false})

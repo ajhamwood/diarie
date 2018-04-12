@@ -74,28 +74,30 @@ function getCameras () {
   })
 }
 
-var swap, initial = true;
+var swap, initial = true, scanning = false;
 $.addEvents({
-  "#click-me": {
+  "#video-wrapper > svg": {
     click: function () {
-      new Promise(resolve => {
-        if (initial) {
-          resolve(getCameras());
-          initial = false
-        } else resolve()
-      }).then(startQRScan)
-        .then(() => {
-          swap && $('#swap')[0].classList.remove('hide');
-          this.classList.add('hide')
-        })
-    }
-  },
-  video: {
-    click: function (e) {
-      $('#click-me')[0].classList.remove('hide')
-      stream.getVideoTracks()[0].stop();
-      clearInterval(ix);
-      if (cameras.length > 1) $("#swap")[0].classList.toggle("hide")
+      if (scanning) {
+        scanning = false;
+        $('#click-me')[0].classList.remove('hide')
+        stream.getVideoTracks()[0].stop();
+        video.srcObject = null;
+        clearInterval(ix);
+        if (cameras.length > 1) $("#swap")[0].classList.toggle("hide")
+      } else {
+        new Promise(resolve => {
+          if (initial) {
+            resolve(getCameras());
+            initial = false
+          } else resolve()
+        }).then(startQRScan)
+          .then(() => {
+            scanning = true;
+            swap && $('#swap')[0].classList.remove('hide');
+            $('#click-me')[0].classList.add('hide')
+          })
+      }
     }
   },
   "#swap": { click: swapCamera }
