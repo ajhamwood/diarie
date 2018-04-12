@@ -35,10 +35,13 @@ function popZones(json) {
   }
 }
 
-function uuid () {
-  var u = crypto.getRandomValues(new Uint8Array(16));
-  u[6] &= 0x0f | 0x40; u[8] &= 0xbf | 0x80;
-  return u.reduce((a, x, i) => a + (~[4, 6, 8, 10].indexOf(i) ? "-" : "") + x.toString(16).padStart(2, 0), "")
+function auth () {
+  return crypto.getRandomValues(new Uint8Array(9)).reduce((a, x, i) => {
+    a[0] = (a[0] << 2) + (x >> 6);
+    a[1].push(x & 63);
+    if (!(++i % 3)) { a[1].push(a[0]); a[0] = 0 }
+    return a
+  }, [0, []])[1].map(x => 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'[x]).join('')
 }
 function createQR (text) {
   var qrcode = new QRCode(-1, QRErrorCorrectLevel.M); //15% error correct
@@ -116,14 +119,14 @@ $.addEvents({
       this.disabled = true;
       $('#gen-ok > .spinner')[0].classList.add('show');
       var form = $('form#gen-qr')[0];
-      form.elements.uuid.value = uuid();
+      form.elements.auth.value = auth();
       fetch('/issue-qr', {method: 'POST', body: new FormData(form), credentials: 'include'})
         .then(res => res.json()).then(res => {
           if (res.ok) {
-            localStorage.setItem('auth', res.uuid);
-            createQR(res.uuid);
+            localStorage.setItem('auth', res.auth);
+            createQR(res.auth);
             $('#qr-info')[0].classList.remove('no-code');
-            $('#qr-info > code')[0].innerText = res.uuid;
+            $('#qr-info > code')[0].innerText = res.auth;
             $('form#gen-qr')[0].classList.remove('warn')
           }
           $('#gen-ok > .spinner')[0].classList.remove('show');

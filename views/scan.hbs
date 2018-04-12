@@ -1,7 +1,26 @@
 {{#if message}}<p>{{message}}</p>{{/if}}
 <div id="video-wrapper">
-  <video></video>
+  <video preload="none"></video>
   <div id="click-me">Click me</div>
+  <svg viewBox="0 0 256 256">
+    <g fill="#ffffff">
+      <rect width="64" height="64" x="64" y="128" />
+      <rect style="stroke:#000000;stroke-width:8" width="40" height="40" x="76" y="140" />
+      <rect width="32" height="32" x="128" y="192" />
+      <rect width="32" height="32" x="192" y="192" />
+      <rect width="32" height="128" x="160" y="64" />
+      <rect width="32" height="32" x="192" y="32" />
+    </g>
+    <g fill="#000000">
+      <rect width="32" height="64" x="32" y="128" />
+      <rect width="64" height="32" x="64" y="192" />
+      <rect width="32" height="160" x="128" y="32" />
+      <rect width="80" height="32" x="64" y="96" />
+      <rect width="32" height="32" x="160" y="192" />
+      <rect width="48" height="32" x="144" y="32" />
+      <rect width="16" height="16" x="88" y="152" />
+    </g>
+  </svg>
   <div id="swap" class="icon hide">&#59648;</div>
   <div id="login-fail" class="icon hide">&#59919;</div>
 </div>

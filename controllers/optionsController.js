@@ -37,13 +37,12 @@ router.post('/purge', async (req, res) => {
 });
 
 router.post('/issue-qr', upload.array(), async (req, res) => {
-  let uuid = req.body.uuid,
-      hash = await bcrypt.hash(uuid, saltRounds);
+  let auth = req.body.auth,
+      hash = await bcrypt.hash(auth, saltRounds);
   await req.app.db.collection('options').update({option: 'auth'}, {option: 'auth', hash}, {upsert: 1});
   req.session.hash = this.hash = hash;
-  req.session.auth = 'ok';
-  await req.app.db.collection('welcome').findOneAndUpdate({initial: {$exists: 1}}, {initial: false});
-  res.send({ok: 1, uuid})
+  req.session.login = 'ok';
+  res.send({ok: 1, auth})
 });
 
 router.get('/help', (req, res) => res.render('help'));
