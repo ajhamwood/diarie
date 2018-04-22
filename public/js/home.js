@@ -1,7 +1,7 @@
 // Load dates and times
 var locale = 'en-AU',
-    dateFormat = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone },
-    timeFormat = { hour: 'numeric', minute: 'numeric', timeZone },
+    dateFormat = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timezone },
+    timeFormat = { hour: 'numeric', minute: 'numeric', timezone },
     prevDate, curDate, frags= [];
 
 $('.entry').forEach(n => {
@@ -21,6 +21,16 @@ $('.entry').forEach(n => {
 // Events
 var flag = true;
 $.addEvents({
+  "": {
+    load: function () {
+      $('#pagination > a').forEach(x => {
+        let p = x.dataset.pp, n = x.dataset.np, q = new URLSearchParams();
+        if (n != 1) q.set('numPage', n);
+        if (p != 10) q.set('numPage', p);
+        x.href = q.toString() ? '?' + q : ''
+      })
+    }
+  },
   "#next": {
     click: function () {
       if (flag = !flag) return;
@@ -36,8 +46,10 @@ $.addEvents({
         .then(res => res.json()).then(res => {
           if (res.ok) {
             let p = parseInt(localStorage.getItem('perPage') || 10), q = new URLSearchParams();
-            q.set('numPage', Math.floor(res.index / p) + 1)
-            q.set('perPage', p);
+            if (res.index >= p) q.delete('numPage');
+            else q.set('numPage', Math.floor(res.index / p) + 1);
+            if (p == 10) q.delete('perPage');
+            else q.set('perPage', p);
             location.search = q
           }
         })
@@ -48,9 +60,12 @@ $.addEvents({
   },
   "#page-length > select": {
     change: function () {
-      let p = [5, 10, 25, 50, 100][parseInt(this.selectedIndex)], q = new URLSearchParams(location.search);
-      q.set('numPage', Math.ceil(((parseInt(q.get('numPage') || 1) - 1) * parseInt(q.get('perPage') || 10) + 1) / p));
-      q.set('perPage', p);
+      let p = [5, 10, 25, 50, 100][parseInt(this.selectedIndex)], q = new URLSearchParams(location.search),
+          n = Math.ceil(((parseInt(q.get('numPage') || 1) - 1) * parseInt(q.get('perPage') || 10) + 1) / p);
+      if (n == 1) q.delete('numPage');
+      else q.set('numPage', n);
+      if (p == 10) q.delete('perPage');
+      else q.set('perPage', p);
       localStorage.setItem('perPage', p);
       location.search = q
     }

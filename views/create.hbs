@@ -1,7 +1,7 @@
 <form action="/create" method="POST" class="rest">
   <h1>Create an entry</h1>
   <input type="hidden" name="timestamp">
-  <input type="hidden" name="id" value="{{id}}">
+  <input type="hidden" name="entryid" value="{{entryid}}">
   <input type="text" placeholder="Title" name="title">
   <span>
     <input type="time" name="time"
@@ -14,7 +14,7 @@
       <button class="icon">&#59914;</button>
       <input type="file" accept="image/*" name="files" multiple>
     </li></ul>
-    <div id="img-md">Insert into markdown using: <code>![Your text](/images/{{id}}/<span></span>)</code></div>
+    <div id="img-md">Insert into markdown using: <code>![Your text](/images/{{entryid}}/<span></span>)</code></div>
     <ul id="images"></ul>
   </div>
   <button type="submit">Create <span class="spinner icon">&#59772;</spin></button>

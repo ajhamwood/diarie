@@ -6,12 +6,11 @@ const
   multer = require('multer'),
   storage = multer.memoryStorage(),
   upload = multer({ storage }),
-  ObjectId = require('mongodb').ObjectId,
-  GridFSBucket = require('mongodb').GridFSBucket,
+  { ObjectId, GridFSBucket } = require('mongodb'),
   { Readable } = require('stream');
 
 
-router.get('/create', (req, res) => res.render('create', {id: ObjectId()}));
+router.get('/create', (req, res) => res.render('create', {entryid: ObjectId()}));
 
 router.post('/create', upload.array('files', 20), async (req, res) => {
   let bucket = new GridFSBucket(req.app.db, { bucketName: 'images' }),
@@ -23,18 +22,23 @@ router.post('/create', upload.array('files', 20), async (req, res) => {
   });
   await Promise.all(req.files.map(async (file, ix) => {
     let stream = new Readable(),
-        imagename = req.body.id + '/' + req.body.filenames[ix].name
+        imagename = req.body.entryid + '/' + req.body.filenames[ix].name
     stream.push(file.buffer);
     stream.push(null);
     await new Promise(r => stream.pipe(bucket.openUploadStream(imagename)).on('finish', r))
     debug("saved image %s", imagename)
   }));
 
-  let _id = ObjectId(req.body.id),
-      {timestamp, title, body, filenames} = req.body;
+  let {entryid, timestamp, title, body, filenames} = req.body;
   timestamp = parseInt(timestamp);
-  await req.app.db.collection('entries').update({_id}, {timestamp, title, body, filenames}, {upsert: true});
-  res.send({ok: 1, index: await req.app.db.collection('entries').find({timestamp: {$lt: timestamp}}).count()})
+  await req.app.db.collection('accounts').update({authid: req.session.authid}, {$push: {entries: {entryid, timestamp, title, body, filenames}}, $set: {'about.initial': false}});
+  res.send(Object.assign((await req.app.db.collection('accounts').aggregate([
+    {$match: {authid: req.session.authid}},
+    {$unwind: '$entries'},
+    {$replaceRoot: {newRoot: '$entries'}},
+    {$match: {timestamp: {$lt: timestamp}}},
+    {$count: 'index'}
+  ]).toArray())[0] || {index: 0}, {ok: 1}))
 });
 
 module.exports = router

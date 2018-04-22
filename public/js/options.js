@@ -66,15 +66,8 @@ $.addEvents({
       var canvas = $("canvas")[0], auth = localStorage.getItem('auth');
       canvas.width = 640;
       canvas.height = 640;
-      if (auth) {
-        if (initial) {
-          localStorage.removeItem('auth');
-          $('#qr-info')[0].classList.add('no-code')
-        } else {
-          createQR(auth);
-          $('#qr-info > code')[0].innerText = auth;
-        }
-      } else $('#qr-info')[0].classList.add('no-code')
+      createQR(auth);
+      $('#qr-info > code')[0].innerText = auth
     }
   },
   "#timezone-search": {
@@ -121,14 +114,21 @@ $.addEvents({
       var form = $('form#gen-qr')[0];
       form.elements.auth.value = auth();
       fetch('/issue-qr', {method: 'POST', body: new FormData(form), credentials: 'include'})
-        .then(res => res.json()).then(res => {
-          if (res.ok) {
-            localStorage.setItem('auth', res.auth);
-            createQR(res.auth);
-            $('#qr-info')[0].classList.remove('no-code');
-            $('#qr-info > code')[0].innerText = res.auth;
-            $('form#gen-qr')[0].classList.remove('warn')
+        .then(res => {
+          let remaining = res.headers.get('x-ratelimit-remaining');
+          if (Number(remaining)) return {data: res.json(), remaining};
+          else return {data: {ok: 0}, remaining}
+        }).then(({data, remaining}) => {
+          if (data.ok) {
+            localStorage.setItem('auth', data.auth);
+            createQR(data.auth);
+            $('#qr-info > code')[0].innerText = data.auth;
           }
+          $('form#gen-qr')[0].classList.remove('warn');
+          $('#qr-limit')[0].innerText = remaining;
+          $('#qr-subsequent')[0].classList.remove('hide')
+        })
+        .catch(console.error).then(() => {
           $('#gen-ok > .spinner')[0].classList.remove('show');
           this.disabled = false
         })

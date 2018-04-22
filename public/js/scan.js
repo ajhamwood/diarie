@@ -76,6 +76,19 @@ function getCameras () {
 
 var swap, initial = true, scanning = false;
 $.addEvents({
+  "#create-account": {
+    click: function () {
+      this.disabled = true;
+      let body = new FormData();
+      body.append('timezone', Intl.DateTimeFormat().resolvedOptions().timeZone);
+      fetch('/create-account', {method: 'POST', body, credentials: 'include'}).then(res => res.json()).then(data => {
+        if (data.ok) {
+          localStorage.setItem('auth', data.auth);
+          location.reload()
+        } else this.disabled = false;
+      })
+    }
+  },
   "#video-wrapper > svg": {
     click: function () {
       if (scanning) {

@@ -7,24 +7,37 @@ const
   RateLimit = require('express-rate-limit'),
   helmet = require('helmet'),
   compression = require('compression'),
-  MongoClient = require('mongodb').MongoClient,
+  { MongoClient } = require('mongodb'),
   session = require('express-session'),
   MongoStore = require('connect-mongo')(session),
   bodyParser = require('body-parser'),
-  hbs = require('express-hbs');
+  hbs = require('express-hbs'),
+  crypto = require('crypto');
 
 class HTTPServer {
-  constructor () {
+  constructor (mode, ttl) {
     var retryConn;
     this.app = express();
+    Object.assign(this.app, { mode, ttl });
+    this.app.createAuth = function () {
+      return crypto.randomBytes(18).reduce((a, x, i) => {
+        a[0] = (a[0] << 2) + (x >> 6);
+        a[1].push(x & 63);
+        if (!(++i % 3)) { a[1].push(a[0]); a[0] = 0 }
+        return a
+      }, [0, []])[1]
+        .map((x, i) => 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'[x] + (i == 11 ? '-' : ''))
+        .join('')
+    };
 
     // Connect to database
 
-    return (retryConn = () => MongoClient.connect(process.env.MONGO_SERVER, {autoReconnect: false})
-      .then(() => MongoClient.connect(process.env.MONGO_SERVER))
+    return (retryConn = () => MongoClient.connect(process.env.MONGO_SERVER, {autoReconnect: true})
       .then(client => {
         debug('Connected to MongoDB');
-        return this.app.db = client.db('diary')
+        return this.app.db = client.on('close', e => debug('*close %O', e.message))
+          .on('reconnect', c => debug('*reconnect %O', c.topology.s.host + ":" + c.topology.s.port))
+          .db('diary')
       })
       .catch(err => {
         debug('*err %s', err.name);
@@ -53,8 +66,8 @@ class HTTPServer {
         name: 'sessionId',
         store: new MongoStore({ db }),
         cookie: {
-          secure: true/*,
-          maxAge: -1>>>1*/
+          secure: true,
+          maxAge: this.app.mode == 'demo' ? Date.now() + this.app.ttl : -1>>>1
         },
         rolling: true,
         unset: 'destroy',
@@ -76,7 +89,7 @@ class HTTPServer {
         )
       });
       hbs.registerHelper('pagelength', function (list, block) {
-        return list.split(', ').reduce((a, x) => a + block.fn({val: x, active: x == block.data.root.pp}), "")
+        return list.split(',').reduce((a, x) => a + block.fn({val: parseInt(x), active: x == block.data.root.pp}), "")
       });
       hbs.registerHelper('succ', function (val) { return parseInt(val) + 1 });
       this.app.set('view engine', 'hbs');
@@ -101,9 +114,9 @@ class HTTPServer {
   }
 
   listen (host, port) {
-    return new Promise((resolve, reject) => this.server = this.app.listen(port, host, err => {
+    return new Promise((resolve, reject, server) => server = this.app.listen(port, host, err => {
       if (err) return reject(err);
-      resolve(this.server)
+      resolve(server)
     }))
       .then(server => debug('Listening on port %d', server.address().port))
       .catch(err => debug('*err %O', err))

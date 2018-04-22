@@ -37,23 +37,23 @@
   {{#if initial}}
   ><ol id="entries"
     ><li class="message">{{{welcome}}}</li
-  {{else if noEntries}}
   ></ol
+  {{else if noEntries}}
   ><ol id="entries"
     ><li class="no-entries">Nothing at all...</li
   ></ol
   {{else if entryList}}
   ><ol id="entries"
   {{#each entryList}}
-    ><li class="entry" id="{{this.id}}" data-epoch="{{this.timestamp}}"
+    ><li class="entry" id="{{this.entryid}}" data-epoch="{{this.timestamp}}"
       ><div class="entry-header"
         ><span class="entry-title" tabindex="-1"
           ><h1 class="entry-titletext">{{this.title}}</h1
-          >&#8203;<a href="/update/{{this.id}}" class="edit" tabindex="-1">edit</a
+          >&#8203;<a href="/update/{{this.entryid}}" class="edit" tabindex="-1">edit</a
           >&#8203;<form action="/delete" method="POST" class="delete"
             ><span tabindex="-1">delete</span
             ><input type="submit" class="confirm-delete" value="are you sure?"
-            ><input type="hidden" name="id" value="{{this.id}}"
+            ><input type="hidden" name="entryid" value="{{this.entryid}}"
           ></form
         ></span
         ><span class="entry-time"></span
@@ -63,8 +63,14 @@
   {{/each}}
   ></ol
   ><nav id="footer-nav"
-    ><span id="pagination">{{#paginate}}<a {{#if this.cur}}class="currentPage"{{/if}} href="/?perPage={{this.pp}}&numPage={{this.num}}">{{this.start}}-{{this.end}}</a>{{/paginate}}</span
-    ><span id="page-length"><select>{{#pagelength '5, 10, 25, 50, 100'}}<option{{#if this.active}} selected{{/if}}>{{this.val}}</option>{{/pagelength}}</select></span
+    ><span id="pagination"
+      >{{#paginate}}<a {{#if this.cur}}class="currentPage"{{/if}} data-pp="{{this.pp}}" data-np="{{this.num}}">{{this.start}}-{{this.end}}</a
+    >{{/paginate}}</span
+    ><span id="page-length"
+      ><select
+        >{{#pagelength '5, 10, 25, 50, 100'}}<option{{#if this.active}} selected{{/if}}>{{this.val}}</option
+      >{{/pagelength}}</select
+    ></span
   ></nav
   {{/if}}
 ></main>
@@ -74,6 +80,6 @@
   ></li>
 </template>
 {{#contentFor 'scripts'}}
-<script>var timeZone = '{{timezone}}'</script>
-<script src="js/diary.js"></script>
+<script>var timezone = '{{timezone}}'</script>
+<script src="js/home.js"></script>
 {{/contentFor}}

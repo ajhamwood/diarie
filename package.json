@@ -4,15 +4,16 @@
   "description": "Private diary.",
   "main": "app.js",
   "author": "Aidan Hamwood",
-  "repository" : {
-    "type" : "git",
-    "url" : "https://github.com/ajhamwood/diary.git"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ajhamwood/diary.git"
   },
   "license": "MIT",
   "scripts": {
-    "dev": "foreman run nodemon app.js",
-    "purge": "scripts/purge.js",
-    "mock": "scripts/mock.js"
+    "dev": "nf run nodemon app.js --",
+    "mock": "scripts/mock.js",
+    "destroy-all": "scripts/destroy-all.js",
+    "qr": "nf run nodemon scripts/qr.js"
   },
   "dependencies": {
     "bcrypt": "^1.0.3",
@@ -25,6 +26,7 @@
     "express-rate-limit": "^2.11.0",
     "express-session": "^1.15.6",
     "helmet": "^3.12.0",
+    "inquirer": "^5.2.0",
     "mongodb": "^3.0.5",
     "multer": "^1.3.0",
     "showdown": "^1.8.6",
@@ -35,8 +37,8 @@
     "node": ">=9.8.0"
   },
   "devDependencies": {
+    "faker": "^4.1.0",
     "foreman": "^2.0.0",
-    "mongodb-extended-json": "^1.10.0",
     "nodemon": "^1.17.2"
   }
 }

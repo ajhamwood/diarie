@@ -7,9 +7,10 @@ const
   multer = require('multer'),
   storage = multer.memoryStorage(),
   upload = multer({ storage }),
-  bcrypt = require('bcrypt'),
+  bcrypt = require('bcrypt'), saltRounds = 10,
   showdown = require('showdown'),
-  xss = require('xss');
+  xss = require('xss'),
+  querystring = require('querystring');
 
 showdown.extension('xssfilter', () => [{type: 'output', filter: xss}]);
 showdown.extension('fixFragLinks', () => [
@@ -19,42 +20,67 @@ showdown.extension('fixFragLinks', () => [
 ]);
 const converter = new showdown.Converter({emoji: true, underline: true, tables: true, extensions: ['xssFilter', 'fixFragLinks']});
 
-
 router.get('/', async (req, res) => {
-  let { initial } = await req.app.db.collection('welcome').findOne({initial: {$exists: 1}});
-  if (req.session.login) {
-    let pp = parseInt(req.query.perPage),
-        np = parseInt(req.query.numPage);
-    if (!pp || pp < 0) pp = 10;
-    if (!np || np < 0) np = 1;
-    let options = await req.app.db.collection('options').findOne({timezone: {$exists: 1}}),
-        count = await req.app.db.collection('entries').count(),
-        entryList = (await req.app.db.collection('entries')
-        .find().sort({timestamp: 1}).limit(pp).skip(pp * (np - 1)).toArray())
-        .map(x => ({
-          body: converter.makeHtml(x.body),
-          id: x._id, title: x.title, timestamp: x.timestamp
-        })), welcome;
+  let account = await req.app.db.collection('accounts').findOne({authid: req.session.authid}, {entries: 0});
+  if ('hash' in req.session) {
+    let { numPage, perPage } = req.query, np = Number(numPage), pp = Number(perPage),
+        { count } = (await req.app.db.collection('accounts').aggregate([
+          {$match: {authid: req.session.authid}},
+          {$unwind: '$entries'},
+          {$count: 'count'}
+        ]).toArray())[0], maxP = Math.ceil(count / pp), query = {};
+    numPage || (np = 1); perPage || (pp = 10);
+    if (np < 1) np = 1; if (np > maxP) np = maxP;
+    if (pp < 1) pp = 5; if (pp > 250) pp = 100;
+    if (numPage && np != 1) query.numPage = np;
+    if (perPage && pp != 10) query.perPage = pp;
+    if (!Object.keys(req.query).every(x => ~['numPage', 'perPage'].indexOf(x)) ||
+      (numPage != query.numPage) || (perPage != query.perPage))
+      return res.redirect(req.baseUrl + '?' + querystring.stringify(query));
+
+    let entryList = (await req.app.db.collection('accounts').aggregate([
+          {$match: {authid: req.session.authid}},
+          {$unwind: '$entries'},
+          {$replaceRoot: {newRoot: '$entries'}},
+          {$sort: {timestamp: 1}},
+          {$skip: (pp * (np - 1))},
+          {$limit: pp}
+        ]).toArray()).map(x => Object.assign(x, { body: converter.makeHtml(x.body) })),
+        noEntries = !entryList.length, initial = account.about.initial, welcome;
     if (initial) welcome = converter.makeHtml((await req.app.db.collection('welcome').findOne({message: {$eq: 1}})).value.body);
-    res.render('home', { pp, np, count, welcome, initial, noEntries: !entryList.length, entryList, timezone: options.timezone })
-  } else res.render( 'scan', initial ?
-    { message: (await req.app.db.collection('welcome').findOne({message: 0})).value }
-    : {} )
+    res.render('home', { pp, np, count, welcome, initial, noEntries, entryList, timezone: account.about.timezone })
+  } else res.render('scan', Object.assign({ demo: req.app.mode == 'demo' }, req.session.crumb ? {} :
+    { message: (await req.app.db.collection('welcome').findOne({message: 0})).value }))
 });
 
 router.post('/', upload.array(), async (req, res) => {
-  let auth = await req.app.db.collection('options').findOne({option: 'auth'});
-  if (auth && 'auth' in req.body && await bcrypt.compare(req.body.auth, auth.hash)) {
-    req.session.login = 'ok';
-    req.session.hash = auth.hash;
+  let { auth } = req.body, r = auth.split('-'),
+      { hash } = await req.app.db.collection('accounts').findOne({authid: r[0]}, {hash: 1});
+  if (hash && r[1] && await bcrypt.compare(r[1], hash)) {
+    req.session.authid = r[0];
+    req.session.hash = hash;
+    req.session.crumb = true;
     res.send({ok: 1});
-    await req.app.db.collection('welcome').findOneAndUpdate({initial: {$exists: 1}}, {initial: false})
+    await req.app.db.collection('accounts').findOneAndUpdate({authid: r[0]}, {$set: {'about.initial': false}})
   } else res.send({ok: 0})
 });
 
 router.get('/logout', async (req, res) => {
-  await req.session.destroy();
+  delete req.session.authid;
+  delete req.session.hash;
   res.redirect('/')
+});
+
+router.post('/create-account', upload.array(), async (req, res) => {
+  let auth = req.app.createAuth(), r = auth.split('-'),
+      hash = await bcrypt.hash(r[1], saltRounds),
+      { timezone } = req.body;
+  await req.app.db.collection('accounts').insert(
+    Object.assign({authid: r[0], hash, entries: [], about: {timezone, initial: true}}, req.app.mode == 'demo' ? {createdAt: new Date()} : {})
+  );
+  req.session.authid = r[0];
+  req.session.hash = hash;
+  res.send({ok: 1, auth})
 });
 
 module.exports = router

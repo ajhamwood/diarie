@@ -4,11 +4,10 @@
   <input type="text" id="timezone-search" placeholder="Search timezones"
   ><select name="timezone" required></select
   ><button type="submit">Update</button>
-  <input type="hidden" name="option" value="timezone">
 </form>
 <form action="/issue-qr" method="POST" id="gen-qr">
   <h2>Issue QR Code</h2>
-  <button id="generate">Generate</button>
+  <button id="generate">Generate <span id="qr-subsequent" class="hide">(max <span id="qr-limit">{{remaining}}</span> remaining)</span></button>
   <div id="warning">
     <div>Warning: replaces current QR code (so it will no longer work)</div>
     <button id="gen-cancel">Cancel</button>
@@ -40,7 +39,7 @@
   <option></option>
 </template>
 {{#contentFor 'scripts'}}
-<script>var timeZone = '{{timezone}}', initial = {{initial}}</script>
+<script>var timeZone = '{{timezone}}'</script>
 <script src="https://cdn.rawgit.com/jeromeetienne/jquery-qrcode/master/src/qrcode.js"></script>
 <script src="/js/options.js"></script>
 {{/contentFor}}
