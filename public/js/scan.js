@@ -76,6 +76,18 @@ function getCameras () {
 
 var swap, initial = true, scanning = false;
 $.addEvents({
+  "": {
+    load: function () {
+      let use = $('svg')[0].removeChild($('svg > use')[0]);
+      for (let i = 0; i < 8; i++) for (let j = 0; j < 8; j++) {
+        let op = .875 - .25 * Math.random();
+        use.setAttribute('fill', (i + j) % 2 ? '#' + [255, 20, 147].map(x => Math.floor(x + op * (256 - x)).toString(16)).join('') : 'url(#hatch)');
+        use.setAttribute('x', 32 * i + .2 * ((i + j) % 2));
+        use.setAttribute('y', 32 * j + .5 * ((i + j) % 2));
+        $('svg')[0].appendChild(use.cloneNode())
+      }
+    }
+  },
   "#create-account": {
     click: function () {
       this.disabled = true;

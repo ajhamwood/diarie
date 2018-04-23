@@ -4,8 +4,7 @@
 require('dotenv').config();
 const
   debug = require('debug')('mock'),
-  MongoClient = require('mongodb').MongoClient,
-  ObjectId = require('mongodb').ObjectId,
+  { MongoClient, ObjectId } = require('mongodb'),
   argv = require('yargs')
     .usage('Usage: ./$0\nInserts dummy data into entries table and unsets \'welcome\' flag')
     .option('m', { alias: 'mode', describe: 'Site mode. (Demo*/Full)', default: 'demo' })

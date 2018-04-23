@@ -1,6 +1,6 @@
 require('dotenv').config();
 const
-  debug = require('debug')('diary'),
+  debug = require('debug')('diarie'),
   express = require('express'),
   router = express.Router(),
   RateLimit = require('express-rate-limit'),

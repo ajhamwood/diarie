@@ -1,8 +1,9 @@
 require('dotenv').config();
 const
-  debug = require('debug')('diary'),
+  debug = require('debug')('diarie'),
   express = require('express'),
   router = express.Router(),
+  RateLimit = require('express-rate-limit'),
   session = require('express-session'),
   multer = require('multer'),
   storage = multer.memoryStorage(),
@@ -11,6 +12,13 @@ const
   showdown = require('showdown'),
   xss = require('xss'),
   querystring = require('querystring');
+var limiter = new RateLimit({
+  windowMs: 60*60*1000,
+  delayAfter: 1,
+  delayMs: 3*1000,
+  max: 5,
+  message: 'New account flood limit'
+});
 
 showdown.extension('xssfilter', () => [{type: 'output', filter: xss}]);
 showdown.extension('fixFragLinks', () => [
@@ -24,11 +32,12 @@ router.get('/', async (req, res) => {
   let account = await req.app.db.collection('accounts').findOne({authid: req.session.authid}, {entries: 0});
   if ('hash' in req.session) {
     let { numPage, perPage } = req.query, np = Number(numPage), pp = Number(perPage),
-        { count } = (await req.app.db.collection('accounts').aggregate([
+        maybeCount = (await req.app.db.collection('accounts').aggregate([
           {$match: {authid: req.session.authid}},
           {$unwind: '$entries'},
           {$count: 'count'}
-        ]).toArray())[0], maxP = Math.ceil(count / pp), query = {};
+        ]).toArray())[0],
+        count = maybeCount ? maybeCount.count : 0, maxP = Math.ceil(count / pp), query = {};
     numPage || (np = 1); perPage || (pp = 10);
     if (np < 1) np = 1; if (np > maxP) np = maxP;
     if (pp < 1) pp = 5; if (pp > 250) pp = 100;
@@ -55,8 +64,8 @@ router.get('/', async (req, res) => {
 
 router.post('/', upload.array(), async (req, res) => {
   let { auth } = req.body, r = auth.split('-'),
-      { hash } = await req.app.db.collection('accounts').findOne({authid: r[0]}, {hash: 1});
-  if (hash && r[1] && await bcrypt.compare(r[1], hash)) {
+      maybeHash = await req.app.db.collection('accounts').findOne({authid: r[0]}, {hash: 1});
+  if (maybeHash && r[1] && await bcrypt.compare(r[1], maybeHash.hash)) {
     req.session.authid = r[0];
     req.session.hash = hash;
     req.session.crumb = true;
@@ -71,7 +80,7 @@ router.get('/logout', async (req, res) => {
   res.redirect('/')
 });
 
-router.post('/create-account', upload.array(), async (req, res) => {
+router.post('/create-account', upload.array(), limiter, async (req, res) => {
   let auth = req.app.createAuth(), r = auth.split('-'),
       hash = await bcrypt.hash(r[1], saltRounds),
       { timezone } = req.body;
@@ -80,6 +89,7 @@ router.post('/create-account', upload.array(), async (req, res) => {
   );
   req.session.authid = r[0];
   req.session.hash = hash;
+  req.session.crumb = true;
   res.send({ok: 1, auth})
 });
 

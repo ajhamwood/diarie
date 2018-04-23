@@ -2,7 +2,7 @@
 
 require('dotenv').config();
 const
-  debug = require('debug')('diary'),
+  debug = require('debug')('diarie'),
   express = require('express'),
   RateLimit = require('express-rate-limit'),
   helmet = require('helmet'),
@@ -37,7 +37,7 @@ class HTTPServer {
         debug('Connected to MongoDB');
         return this.app.db = client.on('close', e => debug('*close %O', e.message))
           .on('reconnect', c => debug('*reconnect %O', c.topology.s.host + ":" + c.topology.s.port))
-          .db('diary')
+          .db('diarie')
       })
       .catch(err => {
         debug('*err %s', err.name);

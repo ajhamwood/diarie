@@ -1,6 +1,6 @@
 require('dotenv').config();
 const
-  debug = require('debug')('diary'),
+  debug = require('debug')('diarie'),
   express = require('express'),
   router = express.Router(),
   session = require('express-session'),

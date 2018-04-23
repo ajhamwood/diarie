@@ -1,15 +1,15 @@
 html, body {
   height: calc(100% - 13px);
-  font-family: 'plantin' !important }
+  font-family: plantin !important }
 h1, h2, h3, h4, h5, h6 {
   font-weight: normal !important;
-  font-family: 'chiswick' !important }
+  font-family: chiswick !important }
 th {
   border-right: .5rem solid #f9f9f9;
   background: #f1f1f1 }
 th:last-of-type { border: 0 }
-code { font-family: 'bb-roller-mono' }
-.icon { font-family: 'iconfont' }
+code { font-family: bb-roller-mono }
+.icon { font-family: iconfont }
 p { text-indent: 4em }
 p img { margin-left: -4em }
 .spinner { display: none }
@@ -40,15 +40,40 @@ p img { margin-left: -4em }
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
-  user-select: none }
+  user-select: none;
+  overflow: hidden }
   .scan > * { margin: 3rem }
+  #hardcover {
+    position: absolute;
+    width: 105%;
+    height: 105%;
+    z-index: -1 }
   #create-account {
     position: absolute;
     top: 0;
     right: 0;
     margin: 5px;
     opacity: .3 }
+  div#create-account {
+    background: center/cover url('../img/book2.svg');
+    width: 3rem;
+    height: 3rem;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 3rem;
+    font-size: 3rem;
+    cursor: pointer }
+  div#create-account:hover::before {
+    content: "Create\a0 your\a0 diary";
+    position: absolute;
+    right: calc(3rem + 10px);
+    background: white;
+    display: inline;
+    line-height: normal;
+    margin-top: .5rem;
+    font: 1.8rem plantin }
   #create-account:hover, #create-account:focus { opacity: 1 }
+  .scan span { background: white }
   .scan > #video-wrapper {
     width: 50vmin;
     height: 50vmin;
@@ -131,13 +156,14 @@ nav#header-nav {
       margin: 0;
       top: calc(3rem + 1px);
       right: 0;
-      background: #f9f9f9;
-      border: 1px solid black;
+      background: #fff4fa;
+      border: 1px solid #ffd0ea;
       list-style: none;
       padding: .5rem 1rem;
       width: max-content;
     	width: -moz-max-content;
-    	width: -webkit-max-content }
+    	width: -webkit-max-content;
+      z-index: -1 }
     #menu:focus > #menu-list,
     #menu:focus-within > #menu-list {
       display: block }

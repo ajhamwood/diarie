@@ -68,6 +68,12 @@ $.addEvents({
       canvas.height = 640;
       createQR(auth);
       $('#qr-info > code')[0].innerText = auth
+    },
+    click: function (e) {
+      if (!~e.composedPath().indexOf($('#confirm-purge')[0])) {
+        $('form#purge')[0].classList.remove('confirm');
+        $('#confirm-purge > input')[0].value = ''
+      }
     }
   },
   "#timezone-search": {
@@ -89,14 +95,14 @@ $.addEvents({
   },
   "#confirm-purge > input": {
     keypress: function (e) {
-      if (e.key != 'Enter') return;
-      if (e.target.value != 'Man Shan Kan') {
-        $('form#purge')[0].classList.remove('confirm');
-        this.value = ''
-      } else {
+      if (e.key != 'Enter') return false;
+      if (e.target.value == 'Delete diary') {
         $('button', this.form)[0].disabled = true;
         this.form.elements.auth.value = localStorage.getItem('auth');
         this.form.submit()
+      } else {
+        $('form#purge')[0].classList.remove('confirm');
+        this.value = ''
       }
     }
   },

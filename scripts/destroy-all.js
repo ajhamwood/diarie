@@ -4,7 +4,7 @@
 require('dotenv').config();
 const
   debug = require('debug')('destroy-all'),
-  MongoClient = require('mongodb').MongoClient,
+  { MongoClient } = require('mongodb'),
   argv = require('yargs')
     .usage('Usage: ./$0\nRemoves all accounts and data and resets the \'welcome\' flag.')
     .help('h')
@@ -18,7 +18,7 @@ process.env.MONGO_SERVER = process.env.DYNO ? process.env.MONGO_SERVER_HEROKU : 
 inquirer.prompt({type: 'confirm', name: 'confirm', message: 'This program irreversibly destroys all data stored by Diary. Continue?'}).then(answer => {
   if (answer.confirm) {
     MongoClient.connect(process.env.MONGO_SERVER)
-    .then(client => (conn = client).db('diary'))
+    .then(client => (conn = client).db('diarie'))
     .then(result => (db = result).dropDatabase())
     .then(() => Promise.all([
       db.createCollection('sessions').then(() => debug('Sessions dropped')),

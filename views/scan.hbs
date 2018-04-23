@@ -1,5 +1,18 @@
-{{#if demo}}<button id="create-account">Create 1hr demo account</button>{{/if}}
-{{#if message}}<p>{{message}}</p>{{/if}}
+<svg id="hardcover" viewBox="0 0 256 256" preserveAspectRatio="xMidYMid slice">
+  <symbol id="patch">
+    <rect width="32" height="32" x="0" y="0" />
+  </symbol>
+  <defs>
+    <pattern id="hatch" width="1" height="1" patternUnits="userSpaceOnUse">
+      <polygon points="0,.75 .75,0 1,0 0,1" fill="#ff1493"/>
+      <polygon points="1,.75 .75,1 1,1" fill="#ff1493"/>
+    </pattern>
+  </defs>
+  <use href="#patch" fill="#fff"/>
+</svg>
+{{#if demo}}<button id="create-account">Create 1hr demo account</button>
+{{else if message}}<div id="create-account" class="icon">&#59648;</div>{{/if}}
+{{#if message}}<p><span>{{message}}</span></p>{{/if}}
 <div id="video-wrapper">
   <video preload="none"></video>
   <div id="click-me">Click me</div>
@@ -22,7 +35,7 @@
       <rect width="16" height="16" x="88" y="152" />
     </g>
   </svg>
-  <div id="swap" class="icon hide">&#59648;</div>
+  <div id="swap" class="icon hide">&#59649;</div>
   <div id="login-fail" class="icon hide">&#59919;</div>
 </div>
 {{#contentFor 'scripts'}}
