@@ -26,7 +26,7 @@ $.addEvents({
       $('#pagination > a').forEach(x => {
         let p = x.dataset.pp, n = x.dataset.np, q = new URLSearchParams();
         if (n != 1) q.set('numPage', n);
-        if (p != 10) q.set('numPage', p);
+        if (p != 10) q.set('perPage', p);
         x.href = q.toString() ? '?' + q : ''
       })
     }
@@ -46,7 +46,7 @@ $.addEvents({
         .then(res => res.json()).then(res => {
           if (res.ok) {
             let p = parseInt(localStorage.getItem('perPage') || 10), q = new URLSearchParams();
-            if (res.index >= p) q.delete('numPage');
+            if (res.index < p) q.delete('numPage');
             else q.set('numPage', Math.floor(res.index / p) + 1);
             if (p == 10) q.delete('perPage');
             else q.set('perPage', p);

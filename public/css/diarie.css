@@ -4,6 +4,7 @@ html, body {
 h1, h2, h3, h4, h5, h6 {
   font-weight: normal !important;
   font-family: chiswick !important }
+tr { background: #f9f9f9 }
 th {
   border-right: .5rem solid #f9f9f9;
   background: #f1f1f1 }
@@ -47,7 +48,8 @@ p img { margin-left: -4em }
     position: absolute;
     width: 105%;
     height: 105%;
-    z-index: -1 }
+    z-index: -1;
+    margin: 0 }
   #create-account {
     position: absolute;
     top: 0;
@@ -82,7 +84,8 @@ p img { margin-left: -4em }
     width: 100%;
     height: 100%;
     object-fit: cover;
-    background: deeppink }
+    background: deeppink;
+    cursor: pointer }
   .scan video:focus { outline: 0 }
   #click-me {
     color: white;
@@ -96,8 +99,8 @@ p img { margin-left: -4em }
     position: absolute;
     transform: translate(0, calc(-1px - 1rem - 50vmin));
     cursor: pointer }
-  #video-wrapper:hover > #click-me, #video-wrapper:focus > #click-me, #video-wrapper > svg { display: none }
-  #video-wrapper:hover > svg, #video-wrapper:focus > svg {
+  #video-wrapper:hover > #click-me, #video-wrapper > svg { display: none }
+  #video-wrapper:hover > #click-me:not(.hide) + svg {
     display: block;
     width: 50vmin;
     height: 50vmin }
@@ -181,6 +184,7 @@ main {}
   ol#entries {
     list-style: none !important;
     padding: 0 1.5rem }
+    li { overflow-x: auto }
     li.message {
       border: 4px solid deeppink;
       padding: 2rem 5rem;

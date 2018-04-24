@@ -35,7 +35,7 @@ process.env.MONGO_SERVER = process.env.DYNO ? process.env.MONGO_SERVER_HEROKU : 
     for (let j = 0; j < 1000; j++) {
       entries.push({
         entryid: ObjectId().toString(),
-        timestamp: Date.now() - 1800000 + Math.floor(3600000 * Math.random()),
+        timestamp: Date.now() - 8.64e+9 + Math.floor(1.728e+10 * Math.random()),
         title: faker.lorem.words(),
         body: faker.lorem.paragraphs(),
         filenames: []

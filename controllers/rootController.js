@@ -64,8 +64,8 @@ router.get('/', async (req, res) => {
 
 router.post('/', upload.array(), async (req, res) => {
   let { auth } = req.body, r = auth.split('-'),
-      maybeHash = await req.app.db.collection('accounts').findOne({authid: r[0]}, {hash: 1});
-  if (maybeHash && r[1] && await bcrypt.compare(r[1], maybeHash.hash)) {
+      hash, maybeHash = await req.app.db.collection('accounts').findOne({authid: r[0]}, {hash: 1});
+  if (maybeHash && r[1] && await bcrypt.compare(r[1], hash = maybeHash.hash)) {
     req.session.authid = r[0];
     req.session.hash = hash;
     req.session.crumb = true;

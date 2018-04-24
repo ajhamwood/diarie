@@ -23,7 +23,6 @@ function startQRScan() {
   qrcode.callback = function (result) {
     stream.getVideoTracks()[0].stop();
     clearInterval(ix);
-    scanning = false;
     localStorage.setItem('auth', result);
     let body = new FormData();
     body.append('auth', result);
@@ -31,7 +30,6 @@ function startQRScan() {
       if (json.ok) location.reload()
       else {
         startQRScan();
-        scanning = true;
         $('#login-fail')[0].classList.remove('hide');
         setTimeout(() => $('#login-fail')[0].classList.add('hide'), 1000)
       }
@@ -74,7 +72,7 @@ function getCameras () {
   })
 }
 
-var swap, initial = true, scanning = false;
+var swap, initial = true;
 $.addEvents({
   "": {
     load: function () {
@@ -103,26 +101,25 @@ $.addEvents({
   },
   "#video-wrapper > svg": {
     click: function () {
-      if (scanning) {
-        scanning = false;
-        $('#click-me')[0].classList.remove('hide')
-        stream.getVideoTracks()[0].stop();
-        video.srcObject = null;
-        clearInterval(ix);
-        if (cameras.length > 1) $("#swap")[0].classList.toggle("hide")
-      } else {
-        new Promise(resolve => {
-          if (initial) {
-            resolve(getCameras());
-            initial = false
-          } else resolve()
-        }).then(startQRScan)
-          .then(() => {
-            scanning = true;
-            swap && $('#swap')[0].classList.remove('hide');
-            $('#click-me')[0].classList.add('hide')
-          })
-      }
+      new Promise(resolve => {
+        if (initial) {
+          resolve(getCameras());
+          initial = false
+        } else resolve()
+      }).then(startQRScan)
+        .then(() => {
+          swap && $('#swap')[0].classList.remove('hide');
+          $('#click-me')[0].classList.add('hide')
+        })
+    }
+  },
+  video: {
+    click: function () {
+      $('#click-me')[0].classList.remove('hide')
+      stream.getVideoTracks()[0].stop();
+      video.srcObject = null;
+      clearInterval(ix);
+      if (cameras.length > 1) $("#swap")[0].classList.toggle("hide")
     }
   },
   "#swap": { click: swapCamera }

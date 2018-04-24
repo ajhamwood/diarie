@@ -35,14 +35,6 @@ function popZones(json) {
   }
 }
 
-function auth () {
-  return crypto.getRandomValues(new Uint8Array(9)).reduce((a, x, i) => {
-    a[0] = (a[0] << 2) + (x >> 6);
-    a[1].push(x & 63);
-    if (!(++i % 3)) { a[1].push(a[0]); a[0] = 0 }
-    return a
-  }, [0, []])[1].map(x => 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'[x]).join('')
-}
 function createQR (text) {
   var qrcode = new QRCode(-1, QRErrorCorrectLevel.M); //15% error correct
   qrcode.addData(text);
@@ -118,7 +110,6 @@ $.addEvents({
       this.disabled = true;
       $('#gen-ok > .spinner')[0].classList.add('show');
       var form = $('form#gen-qr')[0];
-      form.elements.auth.value = auth();
       fetch('/issue-qr', {method: 'POST', body: new FormData(form), credentials: 'include'})
         .then(res => {
           let remaining = res.headers.get('x-ratelimit-remaining');

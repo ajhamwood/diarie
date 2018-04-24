@@ -19,7 +19,7 @@ class HTTPServer {
     var retryConn;
     this.app = express();
     Object.assign(this.app, { mode, ttl });
-    this.app.createAuth = function () {
+    this.app.createAuth = () => {
       return crypto.randomBytes(18).reduce((a, x, i) => {
         a[0] = (a[0] << 2) + (x >> 6);
         a[1].push(x & 63);
