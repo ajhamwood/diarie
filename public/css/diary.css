@@ -1,5 +1,4 @@
 html, body {
-  /*margin-bottom: 20rem !important; XXX: check scan vs options*/
   height: calc(100% - 13px);
   font-family: 'plantin' !important }
 h1, h2, h3, h4, h5, h6 {
@@ -8,6 +7,7 @@ h1, h2, h3, h4, h5, h6 {
 th {
   border-right: .5rem solid #f9f9f9;
   background: #f1f1f1 }
+tr { background: #f9f9f9 }
 th:last-of-type { border: 0 }
 code { font-family: 'bb-roller-mono' }
 .icon { font-family: 'iconfont' }
@@ -37,7 +37,19 @@ p img { margin-left: -4em }
   display: flex;
   flex-flow: column wrap;
   align-items: center;
-  justify-content: center }
+  justify-content: center;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  overflow: hidden }
+  #hardcover {
+    position: absolute;
+    width: 105%;
+    height: 105%;
+    z-index: -1;
+    margin: 0 }
+  .scan span { background: white }
   .scan > * { margin: 3rem }
   .scan > #video-wrapper {
     width: 50vmin;
@@ -47,8 +59,9 @@ p img { margin-left: -4em }
     width: 100%;
     height: 100%;
     object-fit: cover;
-    background: deeppink }
-  .scan video:focus { outline: 0 }
+    background: deeppink;
+    cursor: pointer }
+  #video-wrapper:focus { outline: 0 }
   #click-me {
     color: white;
     position: absolute;
@@ -56,17 +69,13 @@ p img { margin-left: -4em }
     font: 20vmin chiswick;
     width: 50vmin;
     text-align: center;
-    line-height: 1.2em;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none }
+    line-height: 1.2em }
   #video-wrapper > svg {
     position: absolute;
     transform: translate(0, calc(-1px - 1rem - 50vmin));
     cursor: pointer }
-  #video-wrapper:hover > #click-me, #video-wrapper:focus > #click-me, #video-wrapper > svg { display: none }
-  #video-wrapper:hover > svg, #video-wrapper:focus > svg {
+  #video-wrapper:hover > #click-me, #video-wrapper > svg { display: none }
+  #video-wrapper:hover > #click-me:not(.hide) + svg {
     display: block;
     width: 50vmin;
     height: 50vmin }
@@ -82,14 +91,6 @@ p img { margin-left: -4em }
     font-size: 10em;
     color: #ea2713 }
   #click-me.hide, #swap.hide, #login-fail.hide { display: none }
-
-  /*main > svg {
-      position: absolute;
-      top: 6px;
-      left: calc(3rem + 13px);
-      height: 3rem;
-      width: 3rem;
-  }*/
 
 /*home*/
 nav#header-nav {
@@ -133,13 +134,14 @@ nav#header-nav {
       margin: 0;
       top: calc(3rem + 1px);
       right: 0;
-      background: #f9f9f9;
-      border: 1px solid black;
+      background: #fff4fa;
+      border: 1px solid #ffd0ea;
       list-style: none;
       padding: .5rem 1rem;
       width: max-content;
     	width: -moz-max-content;
-    	width: -webkit-max-content }
+    	width: -webkit-max-content;
+      z-index: -1 }
     #menu:focus > #menu-list,
     #menu:focus-within > #menu-list {
       display: block }
@@ -157,6 +159,7 @@ main {}
   ol#entries {
     list-style: none !important;
     padding: 0 1.5rem }
+    li { overflow-x: auto }
     li.message {
       border: 4px solid deeppink;
       padding: 2rem 5rem;
@@ -259,7 +262,7 @@ main {}
             font-weight: bold;
             cursor: pointer;
             border: 0 }
-        .entry-time { font-style: italic UpdateUpdate}
+        .entry-time { font-style: italic }
       .entry-body { margin: 1rem 0 0 .5rem }
   nav#footer-nav {
     text-align: center;

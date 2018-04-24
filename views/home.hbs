@@ -63,8 +63,14 @@
   {{/each}}
   ></ol
   ><nav id="footer-nav"
-    ><span id="pagination">{{#paginate}}<a {{#if this.cur}}class="currentPage"{{/if}} href="/?perPage={{this.pp}}&numPage={{this.num}}">{{this.start}}-{{this.end}}</a>{{/paginate}}</span
-    ><span id="page-length"><select>{{#pagelength '5, 10, 25, 50, 100'}}<option{{#if this.active}} selected{{/if}}>{{this.val}}</option>{{/pagelength}}</select></span
+    ><span id="pagination"
+      >{{#paginate}}<a {{#if this.cur}}class="currentPage"{{/if}} data-pp="{{this.pp}}" data-np="{{this.num}}">{{this.start}}-{{this.end}}</a
+    >{{/paginate}}</span
+    ><span id="page-length"
+      ><select
+        >{{#pagelength '5, 10, 25, 50, 100'}}<option{{#if this.active}} selected{{/if}}>{{this.val}}</option
+      >{{/pagelength}}</select
+    ></span
   ></nav
   {{/if}}
 ></main>
@@ -74,6 +80,6 @@
   ></li>
 </template>
 {{#contentFor 'scripts'}}
-<script>var timeZone = '{{timezone}}'</script>
-<script src="js/diary.js"></script>
+<script>var timezone = '{{timezone}}'</script>
+<script src="js/home.js"></script>
 {{/contentFor}}

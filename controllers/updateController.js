@@ -12,8 +12,7 @@ const
 
 
 router.get('/update/:id', async (req, res) => {
-  let result = await req.app.db.collection('entries').findOne(ObjectId(req.params.id));
-  res.render('update', {data: result})
+  res.render('update', await req.app.db.collection('entries').findOne(ObjectId(req.params.id)))
 });
 
 router.post('/update', upload.array('files', 20), async (req, res) => {
@@ -25,14 +24,14 @@ router.post('/update', upload.array('files', 20), async (req, res) => {
   if ('remove' in req.body) {
     removeFiles = JSON.parse(req.body.remove);
     let remove = removeFiles.map(i => req.body.id + '/' + i),
-        bucket = new GridFSBucket(req.app.db, { bucketName: 'images'});
+        bucket = new GridFSBucket(req.app.db, { bucketName: 'images' });
     await Promise.all((await bucket.find({filename: {$in : remove}}, {filename: 1}).toArray()).map(async ({_id, filename}) => {
       await bucket.delete(_id);
       debug('deleted image %s', filename)
     }))
   }
 
-  // Rename duplicates in update
+  // Rename duplicates images in update
   let remain = (await req.app.db.collection('entries').findOne({_id}, {filenames: 1})).filenames,
       renameFiles = {}, reps;
   remain = remain.filter(x => !removeFiles.includes(x.name));

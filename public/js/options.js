@@ -35,14 +35,6 @@ function popZones(json) {
   }
 }
 
-function auth () {
-  return crypto.getRandomValues(new Uint8Array(9)).reduce((a, x, i) => {
-    a[0] = (a[0] << 2) + (x >> 6);
-    a[1].push(x & 63);
-    if (!(++i % 3)) { a[1].push(a[0]); a[0] = 0 }
-    return a
-  }, [0, []])[1].map(x => 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'[x]).join('')
-}
 function createQR (text) {
   var qrcode = new QRCode(-1, QRErrorCorrectLevel.M); //15% error correct
   qrcode.addData(text);
@@ -75,6 +67,12 @@ $.addEvents({
           $('#qr-info > code')[0].innerText = auth;
         }
       } else $('#qr-info')[0].classList.add('no-code')
+    },
+    click: function (e) {
+      if (!~e.composedPath().indexOf($('#confirm-purge')[0])) {
+        $('form#purge')[0].classList.remove('confirm');
+        $('#confirm-purge > input')[0].value = ''
+      }
     }
   },
   "#timezone-search": {
@@ -96,7 +94,7 @@ $.addEvents({
   },
   "#confirm-purge > input": {
     keypress: function (e) {
-      if (e.key != 'Enter') return;
+      if (e.key != 'Enter') return false;
       if (e.target.value != 'Man Shan Kan') {
         $('form#purge')[0].classList.remove('confirm');
         this.value = ''
@@ -119,16 +117,17 @@ $.addEvents({
       this.disabled = true;
       $('#gen-ok > .spinner')[0].classList.add('show');
       var form = $('form#gen-qr')[0];
-      form.elements.auth.value = auth();
       fetch('/issue-qr', {method: 'POST', body: new FormData(form), credentials: 'include'})
-        .then(res => res.json()).then(res => {
-          if (res.ok) {
-            localStorage.setItem('auth', res.auth);
-            createQR(res.auth);
+        .then(res => res.json()).then(data => {
+          if (data.ok) {
+            localStorage.setItem('auth', data.auth);
+            createQR(data.auth);
             $('#qr-info')[0].classList.remove('no-code');
-            $('#qr-info > code')[0].innerText = res.auth;
-            $('form#gen-qr')[0].classList.remove('warn')
+            $('#qr-info > code')[0].innerText = data.auth
           }
+          $('form#gen-qr')[0].classList.remove('warn')
+        })
+        .catch(console.error).then(() => {
           $('#gen-ok > .spinner')[0].classList.remove('show');
           this.disabled = false
         })

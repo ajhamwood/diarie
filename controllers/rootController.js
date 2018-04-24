@@ -9,7 +9,8 @@ const
   upload = multer({ storage }),
   bcrypt = require('bcrypt'),
   showdown = require('showdown'),
-  xss = require('xss');
+  xss = require('xss'),
+  querystring = require('querystring');
 
 showdown.extension('xssfilter', () => [{type: 'output', filter: xss}]);
 showdown.extension('fixFragLinks', () => [
@@ -23,12 +24,18 @@ const converter = new showdown.Converter({emoji: true, underline: true, tables: 
 router.get('/', async (req, res) => {
   let { initial } = await req.app.db.collection('welcome').findOne({initial: {$exists: 1}});
   if (req.session.login) {
-    let pp = parseInt(req.query.perPage),
-        np = parseInt(req.query.numPage);
-    if (!pp || pp < 0) pp = 10;
-    if (!np || np < 0) np = 1;
+    let { numPage, perPage } = req.query, np = Number(numPage), pp = Number(perPage),
+        count = await req.app.db.collection('entries').count(), maxP = Math.ceil(count / pp), query = {};
+    numPage || (np = 1); perPage || (pp = 10);
+    if (np < 1) np = 1; if (np > maxP) np = maxP;
+    if (pp < 1) pp = 5; if (pp > 250) pp = 100;
+    if (numPage && np != 1) query.numPage = np;
+    if (perPage && pp != 10) query.perPage = pp;
+    if (!Object.keys(req.query).every(x => ~['numPage', 'perPage'].indexOf(x)) ||
+      (numPage != query.numPage) || (perPage != query.perPage))
+      return res.redirect(req.baseUrl + '?' + querystring.stringify(query));
+
     let options = await req.app.db.collection('options').findOne({timezone: {$exists: 1}}),
-        count = await req.app.db.collection('entries').count(),
         entryList = (await req.app.db.collection('entries')
         .find().sort({timestamp: 1}).limit(pp).skip(pp * (np - 1)).toArray())
         .map(x => ({

@@ -1,5 +1,17 @@
-{{#if message}}<p>{{message}}</p>{{/if}}
-<div id="video-wrapper">
+<svg id="hardcover" viewBox="0 0 256 256" preserveAspectRatio="xMidYMid slice">
+  <symbol id="patch">
+    <rect width="32" height="32" x="0" y="0" />
+  </symbol>
+  <defs>
+    <pattern id="hatch" width="1" height="1" patternUnits="userSpaceOnUse">
+      <polygon points="0,.75 .75,0 1,0 0,1" fill="#ff1493"/>
+      <polygon points="1,.75 .75,1 1,1" fill="#ff1493"/>
+    </pattern>
+  </defs>
+  <use href="#patch" fill="#fff"/>
+</svg>
+{{#if message}}<p><span>{{message}}</span></p>{{/if}}
+<div id="video-wrapper" tabIndex="-1">
   <video preload="none"></video>
   <div id="click-me">Click me</div>
   <svg viewBox="0 0 256 256">

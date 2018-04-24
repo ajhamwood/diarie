@@ -23,7 +23,6 @@ function startQRScan() {
   qrcode.callback = function (result) {
     stream.getVideoTracks()[0].stop();
     clearInterval(ix);
-    scanning = false;
     localStorage.setItem('auth', result);
     let body = new FormData();
     body.append('auth', result);
@@ -31,7 +30,6 @@ function startQRScan() {
       if (json.ok) location.reload()
       else {
         startQRScan();
-        scanning = true;
         $('#login-fail')[0].classList.remove('hide');
         setTimeout(() => $('#login-fail')[0].classList.add('hide'), 1000)
       }
@@ -74,30 +72,41 @@ function getCameras () {
   })
 }
 
-var swap, initial = true, scanning = false;
+var swap, initial = true;
 $.addEvents({
+  "": {
+    load: function () {
+      let use = $('svg')[0].removeChild($('svg > use')[0]);
+      for (let i = 0; i < 8; i++) for (let j = 0; j < 8; j++) {
+        let op = .875 - .25 * Math.random();
+        use.setAttribute('fill', (i + j) % 2 ? '#' + [255, 20, 147].map(x => Math.floor(x + op * (256 - x)).toString(16)).join('') : 'url(#hatch)');
+        use.setAttribute('x', 32 * i + .2 * ((i + j) % 2));
+        use.setAttribute('y', 32 * j + .5 * ((i + j) % 2));
+        $('svg')[0].appendChild(use.cloneNode())
+      }
+    }
+  },
   "#video-wrapper > svg": {
     click: function () {
-      if (scanning) {
-        scanning = false;
-        $('#click-me')[0].classList.remove('hide')
-        stream.getVideoTracks()[0].stop();
-        video.srcObject = null;
-        clearInterval(ix);
-        if (cameras.length > 1) $("#swap")[0].classList.toggle("hide")
-      } else {
-        new Promise(resolve => {
-          if (initial) {
-            resolve(getCameras());
-            initial = false
-          } else resolve()
-        }).then(startQRScan)
-          .then(() => {
-            scanning = true;
-            swap && $('#swap')[0].classList.remove('hide');
-            $('#click-me')[0].classList.add('hide')
-          })
-      }
+      new Promise(resolve => {
+        if (initial) {
+          resolve(getCameras());
+          initial = false
+        } else resolve()
+      }).then(startQRScan)
+        .then(() => {
+          swap && $('#swap')[0].classList.remove('hide');
+          $('#click-me')[0].classList.add('hide')
+        })
+    }
+  },
+  video: {
+    click: function () {
+      $('#click-me')[0].classList.remove('hide')
+      stream.getVideoTracks()[0].stop();
+      video.srcObject = null;
+      clearInterval(ix);
+      if (cameras.length > 1) $("#swap")[0].classList.toggle("hide")
     }
   },
   "#swap": { click: swapCamera }

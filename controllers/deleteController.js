@@ -20,7 +20,7 @@ router.post('/delete', upload.array(), async (req, res) => {
     await bucket.delete(_id);
     debug('deleted image %s', filename)
   }));
-  await req.app.db.collection('entries').deleteOne({_id: ObjectId(req.body.id)})
+  await req.app.db.collection('entries').deleteOne({_id: ObjectId(req.body.id)});
   res.send({ok: 1, index: await req.app.db.collection('entries').find({timestamp: {$lt: timestamp}}).count()})
 });
 

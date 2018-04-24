@@ -36,11 +36,11 @@ router.post('/purge', async (req, res) => {
     .catch(() => res.redirect('back'))
 });
 
-router.post('/issue-qr', upload.array(), async (req, res) => {
-  let auth = req.body.auth,
+router.post('/issue-qr', async (req, res) => {
+  let auth = req.app.createAuth(),
       hash = await bcrypt.hash(auth, saltRounds);
   await req.app.db.collection('options').update({option: 'auth'}, {option: 'auth', hash}, {upsert: 1});
-  req.session.hash = this.hash = hash;
+  req.session.hash = hash;
   req.session.login = 'ok';
   res.send({ok: 1, auth})
 });

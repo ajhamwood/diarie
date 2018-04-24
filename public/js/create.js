@@ -10,7 +10,10 @@ var fileEvents = {
         delete rename[images[ix].id]
       }
       images.splice(ix, 1);
-      if ($('span', this.parentNode)[0].classList.contains('selected')) $('#img-md')[0].classList.remove('show')
+      if ($('#img-md')[0].dataset.id == this.parentNode.dataset.id) {
+        $('#img-md')[0].classList.remove('show');
+        delete $('#img-md')[0].dataset.id
+      }
       $(`ul#images > [data-id="${this.parentNode.dataset.id}"]`)[0].remove();
       this.parentNode.remove()
     }
@@ -21,6 +24,7 @@ var fileEvents = {
       $(`ul#images > [data-id="${this.parentNode.dataset.id}"]`)[0].classList.add('selected');
       $('#img-md span')[0].innerText = this.innerText;
       $('#img-md')[0].classList.add('show');
+      $('#img-md')[0].dataset.id = this.parentNode.dataset.id;
       if (!e.ctrlKey && !e.shiftKey && this.classList.contains('selected') &&
         images.reduce((a, x) => x.selected ? a + 1 : a, 0) == 1) {
         e.preventDefault();
@@ -70,7 +74,8 @@ $.addEvents({
             if (ix == 0) {
               img.classList.add('selected');
               $('#img-md span')[0].innerText = filename;
-              $('#img-md')[0].classList.add('show')
+              $('#img-md')[0].classList.add('show');
+              $('#img-md')[0].dataset.id = imgId
             }
 
             return {
@@ -92,7 +97,8 @@ $.addEvents({
           img.selected = false;
           $('span', img.titleElement)[0].classList.remove('selected');
           $('ul#images > .selected').forEach(x => x.classList.remove('selected'));
-          $('#img-md')[0].classList.remove('show')
+          $('#img-md')[0].classList.remove('show');
+          delete $('#img-md')[0].dataset.id
         });
         else if (e.shiftKey && !e.ctrlKey) {
           let select = [], up = true, down = true, i = images.findIndex(x => x.titleElement == document.activeElement.parentNode), di = 0;
@@ -167,11 +173,11 @@ $.addEvents({
       } else action = '/create';
       $('[type=submit] > .spinner')[0].classList.add('show');
       fetch(action, {method: 'POST', body, credentials: 'include'})
-        .then(res => res.json()).then(res => {
-          if (res.ok) {
+        .then(res => res.json()).then(data => {
+          if (data.ok) {
             let p = parseInt(localStorage.getItem('perPage') || 10),
                 q = new URLSearchParams(), r = new URL(window.location);
-            q.set('numPage', Math.floor(res.index / p) + 1)
+            q.set('numPage', Math.floor(data.index / p) + 1)
             q.set('perPage', p);
             r.pathname = '/';
             r.search = q;
@@ -218,7 +224,8 @@ $.addEvents({
         if (ix == 0) {
           img.classList.add('selected');
           $('#img-md span')[0].innerText = file.name;
-          $('#img-md')[0].classList.add('show')
+          $('#img-md')[0].classList.add('show');
+          $('#img-md')[0].dataset.id = imgId
         }
 
         return {

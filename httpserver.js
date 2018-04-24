@@ -7,16 +7,27 @@ const
   RateLimit = require('express-rate-limit'),
   helmet = require('helmet'),
   compression = require('compression'),
-  MongoClient = require('mongodb').MongoClient,
+  { MongoClient } = require('mongodb'),
   session = require('express-session'),
   MongoStore = require('connect-mongo')(session),
   bodyParser = require('body-parser'),
-  hbs = require('express-hbs');
+  hbs = require('express-hbs'),
+  crypto = require('crypto');
 
 class HTTPServer {
   constructor () {
     var retryConn;
     this.app = express();
+    this.app.createAuth = () => {
+      return crypto.randomBytes(18).reduce((a, x, i) => {
+        a[0] = (a[0] << 2) + (x >> 6);
+        a[1].push(x & 63);
+        if (!(++i % 3)) { a[1].push(a[0]); a[0] = 0 }
+        return a
+      }, [0, []])[1]
+        .map((x, i) => 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'[x] + (i == 11 ? '-' : ''))
+        .join('')
+    }
 
     // Connect to database
 
@@ -76,7 +87,7 @@ class HTTPServer {
         )
       });
       hbs.registerHelper('pagelength', function (list, block) {
-        return list.split(', ').reduce((a, x) => a + block.fn({val: x, active: x == block.data.root.pp}), "")
+        return list.split(', ').reduce((a, x) => a + block.fn({val: parseInt(x), active: x == block.data.root.pp}), "")
       });
       hbs.registerHelper('succ', function (val) { return parseInt(val) + 1 });
       this.app.set('view engine', 'hbs');
