@@ -93,4 +93,6 @@ router.post('/create-account', upload.array(), limiter, async (req, res) => {
   res.send({ok: 1, auth})
 });
 
+router.get('/ping', (_, res) => res.status(204).send())
+
 module.exports = router
